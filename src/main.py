@@ -1,34 +1,36 @@
 import cv2
 from voice import falar_assincrono
+from detector import detectar_objetos
 
-
-# Inicializa a câmera e avisa por voz
 cap = cv2.VideoCapture(0)
 falar_assincrono("Sistema Iris Assist iniciado.")
 
-contador_frame = 0
-PULAR_FRAME = 30 # Analisa 1 frame a cada 30 segundos
+contador_frames = 0
+PULAR_FRAMES = 30
+MAX_FRAMES = 450  # Aumentamos para ~15 segundos para dar tempo de testar vários objetos
 
-while True:
-
+while contador_frames < MAX_FRAMES:
     ret, frame = cap.read()
     if not ret:
         break
 
-    contador_frame += 1
+    contador_frames += 1
 
-    # verifica se chegou a hora de analisar o frame
-    if contador_frame % PULAR_FRAME == 0:
-        print(f"Frame {contador_frame}: Hora de chamar o YOLO!")
+    # A cada 30 frames, envia a imagem atual para o YOLO analisar
+    if contador_frames % PULAR_FRAMES == 0:
+        objetos = detectar_objetos(frame)
+        
+        if objetos:
+            texto_alerta = ", ".join(objetos) + " à frente"
+            print(f"[Detecção]: {texto_alerta}")
+            falar_assincrono(texto_alerta)
 
     cv2.imshow("IrisAssist - Tempo Real", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-    """# Aceita 'q' minúsculo ou 'Q' maiúsculo, ou fechar no 'X' da janela
+    
     tecla = cv2.waitKey(1) & 0xFF
     if tecla in [ord('q'), ord('Q')] or cv2.getWindowProperty("IrisAssist - Tempo Real", cv2.WND_PROP_VISIBLE) < 1:
-        break"""
+        break
 
 cap.release()
 cv2.destroyAllWindows()
+print("Sistema encerrado com segurança.")
