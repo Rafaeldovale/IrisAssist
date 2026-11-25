@@ -26,7 +26,7 @@ while contador_frames < MAX_FRAMES:
         objetos, ultimo_frame_anotado = detectar_objetos(frame)
         
         if objetos:
-            texto_alerta = ", ".join(objetos) + " à frente"
+            texto_alerta = ", ".join(objetos) 
             agora = time.time()
             
             # Fala se o objeto mudou OU se já passaram 5 segundos desde o último aviso
