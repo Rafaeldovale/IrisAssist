@@ -39,11 +39,13 @@ def detectar_objetos(frame):
         frame_anotado = result.plot()
         for box in result.boxes:
             # .squeeze() transforma [[x, y, w, h]] em [x, y, w, h]
-                        # Agora pegamos também o x_centro (primeiro valor)
+            # Agora pegamos também o x_centro (primeiro valor)
             x_centro, _, w, h = box.xywh.squeeze()
             area_objeto = float(w * h)
+            proporcao = area_objeto / area_total
 
-            if (area_objeto / area_total) < 0.015:
+            # 1. Ignora objetos muito distantes (menos de 1.5% da tela)
+            if proporcao < 0.015:
                 continue
 
             classe_id = int(box.cls)
@@ -51,8 +53,18 @@ def detectar_objetos(frame):
             
             if nome_ingles in TRADUCAO:
                 posicao = calcular_posicao(float(x_centro), largura_img)
-                alerta_completo = f"{TRADUCAO[nome_ingles]} {posicao}"
+                nome_pt = TRADUCAO[nome_ingles]
+                
+                # 2. Verifica se o objeto ocupa mais de 25% da tela (risco de colisão)
+                                # 2. Alerta curto e direto (sem erro de gênero e rápido na voz)
+                if proporcao > 0.50:
+                    alerta_completo = f"Cuidado, {nome_pt} {posicao}"
+                else:
+                    alerta_completo = f"{nome_pt} {posicao}"
+
+                    
                 objetos_detectados.add(alerta_completo)
+
 
 
     return list(objetos_detectados), frame_anotado
