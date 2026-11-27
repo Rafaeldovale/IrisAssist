@@ -2,18 +2,15 @@ import time
 import cv2
 from voice import falar_assincrono
 from detector import detectar_objetos
+from config import PULAR_FRAMES, MAX_FRAMES, INTERVALO_REPETICAO
 
 cap = cv2.VideoCapture(0)
 falar_assincrono("Sistema Iris Assist iniciado.")
 
 contador_frames = 0
-PULAR_FRAMES = 30
-MAX_FRAMES = 450
-
 ultimo_frame_anotado = None
 ultimo_alerta = ""
 tempo_ultimo_alerta = 0
-INTERVALO_REPETICAO = 5.0  # Só repete o mesmo objeto após 5 segundos
 
 while contador_frames < MAX_FRAMES:
     ret, frame = cap.read()
@@ -26,10 +23,9 @@ while contador_frames < MAX_FRAMES:
         objetos, ultimo_frame_anotado = detectar_objetos(frame)
         
         if objetos:
-            texto_alerta = ", ".join(objetos) 
+            texto_alerta = ", ".join(objetos)
             agora = time.time()
             
-            # Fala se o objeto mudou OU se já passaram 5 segundos desde o último aviso
             if texto_alerta != ultimo_alerta or (agora - tempo_ultimo_alerta) > INTERVALO_REPETICAO:
                 print(f"[Detecção]: {texto_alerta}")
                 falar_assincrono(texto_alerta)
